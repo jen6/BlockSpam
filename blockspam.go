@@ -32,7 +32,6 @@ func IsSpam(content string, spamLinkDomains []string, redirectionDepth int) (boo
 
 		childLinks, err := spamparser.ParseLinks(redirectionResult)
 		if err != nil {
-			fmt.Println(err)
 			return false, err
 		}
 
