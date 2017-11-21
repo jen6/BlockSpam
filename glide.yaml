@@ -1,0 +1,6 @@
+package: github.com/jen6/BlockSpam
+import:
+- package: golang.org/x/net
+  subpackages:
+  - html
+- package: github.com/glkz/rabinkarp

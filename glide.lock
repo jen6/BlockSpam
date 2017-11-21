@@ -1,0 +1,11 @@
+hash: 04630904d0254778d649edd02c938001ace544785265ebaba214dde0710670d8
+updated: 2017-11-22T00:27:52.429000338+09:00
+imports:
+- name: github.com/glkz/rabinkarp
+  version: 79fb77d74a0b84560b8b08a9c8de04a595cc7453
+- name: golang.org/x/net
+  version: fe686d45ea04bc1bd4eff6a52865ce8757320325
+  subpackages:
+  - html
+  - html/atom
+testImports: []
