@@ -4,28 +4,28 @@ import (
 	"github.com/jen6/BlockSpam/link"
 )
 
-type RequestPool struct {
-	pool []*link.Link
+type RequestQueue struct {
+	queue []*link.Link
 }
 
-func (rp RequestPool) IsEmpty() bool {
-	if len(rp.pool) > 0 {
+func (rq RequestQueue) IsEmpty() bool {
+	if len(rq.queue) == 0 {
 		return true
 	} else {
 		return false
 	}
 }
 
-func (rp *RequestPool) Pop() *link.Link {
+func (rq *RequestQueue) Pop() *link.Link {
 	var ret *link.Link
-	if rp.IsEmpty() {
-		ret, rp.pool = rp.pool[0], rp.pool[1:]
+	if rq.IsEmpty() {
+		ret, rq.queue = rq.pool[0], rq.pool[1:]
 	} else {
 		ret = nil
 	}
 	return ret
 }
 
-func (rp *RequestPool) Push(link *link.Link) {
-	rp.pool = append(rp.pool, link)
+func (rq *RequestQueue) Push(link *link.Link) {
+	rq.queue = append(rq.pool, link)
 }
