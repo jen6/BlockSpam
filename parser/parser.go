@@ -18,7 +18,7 @@ const (
 	regexHttp = "^(http|https)://"
 )
 
-func ParseLinks(domain string, trResult spamreq.RedirectResult) ([]*link.Link, error) {
+func ParseLinks(trResult spamreq.RedirectResult) ([]*link.Link, error) {
 	body := trResult.LastResp.Body
 	defer body.Close()
 
