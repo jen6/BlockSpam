@@ -18,8 +18,8 @@ func (rq RequestQueue) IsEmpty() bool {
 
 func (rq *RequestQueue) Pop() *link.Link {
 	var ret *link.Link
-	if rq.IsEmpty() {
-		ret, rq.queue = rq.pool[0], rq.pool[1:]
+	if !rq.IsEmpty() {
+		ret, rq.queue = rq.queue[0], rq.queue[1:]
 	} else {
 		ret = nil
 	}
@@ -27,5 +27,5 @@ func (rq *RequestQueue) Pop() *link.Link {
 }
 
 func (rq *RequestQueue) Push(link *link.Link) {
-	rq.queue = append(rq.pool, link)
+	rq.queue = append(rq.queue, link)
 }
