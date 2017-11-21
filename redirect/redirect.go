@@ -14,7 +14,7 @@ type RedirectResult struct {
 func GetRedirectLinks(head *link.Link, maxRedirect int) (RedirectResult, error) {
 	lastLink := head
 	result := RedirectResult{}
-	for i := 0; i < maxRedirect; i++ {
+	for i := head.Depth; i <= maxRedirect; i++ {
 		client := &http.Client{
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				return http.ErrUseLastResponse
