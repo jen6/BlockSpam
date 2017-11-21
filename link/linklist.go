@@ -10,9 +10,10 @@ type Link struct {
 	Depth      int
 }
 
-func (l *Link) Append(fullLink string) {
+func (l *Link) Append(fullLink string) *Link {
 	newLink := &Link{FullLink: fullLink, Depth: l.Depth + 1}
 	l.childNodes = append(l.childNodes, newLink)
+	return newLink
 }
 
 func (l Link) GetDomain() (string, error) {
