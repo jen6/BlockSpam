@@ -1,8 +1,8 @@
-hash: 04630904d0254778d649edd02c938001ace544785265ebaba214dde0710670d8
-updated: 2017-11-22T00:27:52.429000338+09:00
+hash: 55ef38846f7f7a622ab0e9a94e92f45c0f2fb8eb5f81862c80e574d109be6b63
+updated: 2017-11-22T00:57:52.068177572+09:00
 imports:
-- name: github.com/glkz/rabinkarp
-  version: 79fb77d74a0b84560b8b08a9c8de04a595cc7453
+- name: github.com/jen6/rabinkarp
+  version: 87e9ae042851810442005046bef3d41c490b858e
 - name: golang.org/x/net
   version: fe686d45ea04bc1bd4eff6a52865ce8757320325
   subpackages:
