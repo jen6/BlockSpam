@@ -2,7 +2,10 @@ package spamreq
 
 import (
 	"github.com/jen6/BlockSpam/link"
+	"github.com/jen6/BlockSpam/util"
+	"net"
 	"net/http"
+	"time"
 )
 
 type RedirectResult struct {
@@ -13,13 +16,40 @@ type RedirectResult struct {
 
 func GetRedirectLinks(head *link.Link, maxRedirect int) (RedirectResult, error) {
 	lastLink := head
+	originDomain, _ := lastLink.GetDomain()
+
 	result := RedirectResult{}
 	for i := head.Depth; i <= maxRedirect; i++ {
+
+		var netTransport = &http.Transport{
+			Dial: (&net.Dialer{
+				Timeout: 5 * time.Second,
+			}).Dial,
+			TLSHandshakeTimeout: 5 * time.Second,
+		}
+
 		client := &http.Client{
+			Timeout:   time.Second * 10,
+			Transport: netTransport,
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				return http.ErrUseLastResponse
 			}}
-		resp, err := client.Get(lastLink.FullLink)
+
+		var targetLink string
+		if !spamutil.IsAbsoluteLink(lastLink.FullLink) {
+			domain, err := lastLink.GetDomain()
+			if err != nil {
+				return RedirectResult{}, err
+			}
+			if domain == "" {
+				targetLink = spamutil.ToAbsoluteLink(lastLink.FullLink, originDomain)
+			} else {
+				targetLink = spamutil.ToAbsoluteLink(lastLink.FullLink, domain)
+			}
+		} else {
+			targetLink = lastLink.FullLink
+		}
+		resp, err := client.Get(targetLink)
 		if err != nil {
 			return RedirectResult{}, err
 		}
