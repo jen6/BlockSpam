@@ -41,5 +41,21 @@ func (l *Link) FindDepth(depth int) []*Link {
 			result = append(result, ret...)
 		}
 	}
+	return removeDuplicateLink(result)
+}
+
+func removeDuplicateLink(links []*Link) []*Link {
+	linkMap := map[string]bool{}
+	result := []*Link{}
+
+	for _, link := range links {
+		ok, _ := linkMap[link.FullLink]
+		if !ok {
+			linkMap[link.FullLink] = true
+			result = append(result, link)
+		} else {
+			continue
+		}
+	}
 	return result
 }
