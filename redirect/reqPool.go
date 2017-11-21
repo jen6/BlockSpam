@@ -1,4 +1,4 @@
-package redirect
+package spamreq
 
 import (
 	"github.com/jen6/BlockSpam/link"
