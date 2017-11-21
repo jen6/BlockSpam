@@ -1,6 +1,7 @@
 package spamparser
 
 import (
+	"fmt"
 	"github.com/jen6/BlockSpam/link"
 	"github.com/jen6/BlockSpam/redirect"
 	"golang.org/x/net/html"
@@ -22,15 +23,29 @@ func ParseLinks(trResult spamreq.RedirectResult) ([]*link.Link, error) {
 	body := trResult.LastResp.Body
 	defer body.Close()
 
-	parsedBody, err := html.Parse(body)
-	if err != nil {
-		return []*link.Link{}, err
+	parsedBody := html.NewTokenizer(body)
+	links := []string{}
+	Exitflag := false
+	for {
+		ptok := parsedBody.Next()
+		switch ptok {
+		case html.StartTagToken:
+			tok := parsedBody.Token()
+			if tok.Data == "a" {
+				buf := getAHref(&tok)
+				links = append(links, buf...)
+			}
+		case html.ErrorToken:
+			Exitflag = true
+			break
+		}
+		if Exitflag {
+			break
+		}
 	}
-
-	links := getAHref(parsedBody)
 	lastLink := trResult.LastLink
 	for idx, linkd := range links {
-		if !isAbsoluteLink(linkd) {
+		if !isAbsoluteLink(linkd) || linkd == "" {
 			domain, err := lastLink.GetDomain()
 			if err != nil {
 				return []*link.Link{}, err
@@ -47,20 +62,13 @@ func ParseLinks(trResult spamreq.RedirectResult) ([]*link.Link, error) {
 	return result, nil
 }
 
-func getAHref(node *html.Node) []string {
+func getAHref(node *html.Token) []string {
 	var links []string
-	var loopParse func(node *html.Node)
-	loopParse = func(node *html.Node) {
-		if node.Type == html.ElementNode && node.Data == tokenATag {
-			for _, attr := range node.Attr {
-				if attr.Key == tokenHref {
-					links = append(links, attr.Val)
-					break
-				}
-			}
-		}
-		for iterNode := node.FirstChild; iterNode != nil; iterNode = iterNode.NextSibling {
-			loopParse(iterNode)
+	for _, attr := range node.Attr {
+		if attr.Key == tokenHref {
+			links = append(links, attr.Val)
+			fmt.Println(links)
+			break
 		}
 	}
 	return links
