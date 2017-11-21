@@ -29,32 +29,17 @@ func (l Link) GetDomain() (string, error) {
 }
 
 //if find Link return pointer of Link else nil
-func (l *Link) FindDepth(depth int, domain string) (*Link, error) {
+func (l *Link) FindDepth(depth int) []*Link {
 	if depth == 1 {
-		lDomain, err := l.GetDomain()
-		if err != nil {
-			return nil, err
-		}
-
-		if lDomain == domain {
-			return l, nil
-		} else {
-			return nil, nil
-		}
+		return []*Link{l}
 	}
 
-	var result *Link
-	result = nil
-
+	result := []*Link{}
 	for _, link := range l.childNodes {
-		ret, err := link.FindDepth(depth-1, domain)
-		if err != nil {
-			return nil, err
-		}
-		if ret != nil {
-			result = ret
-			break
+		ret := link.FindDepth(depth - 1)
+		if len(ret) != 0 {
+			result = append(result, ret...)
 		}
 	}
-	return result, nil
+	return result
 }
