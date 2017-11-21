@@ -10,6 +10,10 @@ type Link struct {
 	Depth      int
 }
 
+func NewLinkHead(url string) *Link {
+	return &Link{FullLink: url, Depth: 1}
+}
+
 func (l *Link) Append(fullLink string) *Link {
 	newLink := &Link{FullLink: fullLink, Depth: l.Depth + 1}
 	l.childNodes = append(l.childNodes, newLink)
