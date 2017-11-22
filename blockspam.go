@@ -24,10 +24,15 @@ func IsSpam(content string, spamLinkDomains []string, redirectionDepth int) (boo
 			fmt.Println(err)
 			return false, err
 		}
+		//if depth > max
+		if redirectionResult.LastResp == nil {
+			continue
+		}
 
 		statusCode := redirectionResult.LastResp.StatusCode
-		if statusCode == 301 || statusCode == 302 {
-			continue
+		statusCode = statusCode - (statusCode % 100)
+		if statusCode == 300 {
+			break
 		}
 
 		childLinks, err := spamparser.ParseLinks(redirectionResult)

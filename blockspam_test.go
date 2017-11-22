@@ -33,6 +33,7 @@ func TestIsSpam(t *testing.T) {
 		{"t2", args{link1, []string{link3Domain}, 2}, true, false},
 		{"t3", args{link2, []string{link1Domain}, 2}, true, false},
 		{"t4", args{link2, []string{link3Domain}, 3}, true, false},
+		{"t5", args{link5, []string{link6Domain}, 3}, true, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
