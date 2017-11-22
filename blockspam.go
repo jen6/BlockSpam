@@ -6,6 +6,8 @@ import (
 	"github.com/jen6/BlockSpam/parser"
 	"github.com/jen6/BlockSpam/redirect"
 	"github.com/jen6/rabinkarp"
+	"runtime"
+	"sync"
 )
 
 func IsSpam(content string, spamLinkDomains []string, redirectionDepth int) (bool, error) {
@@ -13,37 +15,49 @@ func IsSpam(content string, spamLinkDomains []string, redirectionDepth int) (boo
 	reqQueue := spamreq.RequestQueue{}
 	reqQueue.Push(head)
 
-	for {
-		if reqQueue.IsEmpty() {
-			break
-		}
+	numCpu := runtime.NumCPU()
+	var wg sync.WaitGroup
+	wg.Add(numCpu)
 
-		linkIter := reqQueue.Pop()
-		redirectionResult, err := spamreq.GetRedirectLinks(linkIter, redirectionDepth)
-		if err != nil {
-			fmt.Println(err)
-			return false, err
-		}
-		//if depth > max
-		if redirectionResult.LastResp == nil {
-			continue
-		}
+	for i := 0; i < numCpu; i++ {
+		go func() {
+			defer wg.Done()
+			for {
+				if reqQueue.IsEmpty() {
+					return
+				}
 
-		statusCode := redirectionResult.LastResp.StatusCode
-		statusCode = statusCode - (statusCode % 100)
-		if statusCode == 300 {
-			break
-		}
+				linkIter := reqQueue.Pop()
+				redirectionResult, err := spamreq.GetRedirectLinks(linkIter, redirectionDepth)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				//if depth > max
+				if redirectionResult.LastResp == nil {
+					continue
+				}
 
-		childLinks, err := spamparser.ParseLinks(redirectionResult)
-		if err != nil {
-			return false, err
-		}
+				statusCode := redirectionResult.LastResp.StatusCode
+				statusCode = statusCode - (statusCode % 100)
+				if statusCode == 300 {
+					return
+				}
 
-		for _, clink := range childLinks {
-			reqQueue.Push(clink)
-		}
+				childLinks, err := spamparser.ParseLinks(redirectionResult)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+
+				for _, clink := range childLinks {
+					reqQueue.Push(clink)
+				}
+			}
+		}()
 	}
+	wg.Wait()
+	//TODO add error return in goroutine
 
 	resultLinks := head.FindDepth(redirectionDepth)
 	if len(resultLinks) == 0 {
