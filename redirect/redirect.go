@@ -3,7 +3,6 @@ package spamreq
 import (
 	"github.com/jen6/BlockSpam/link"
 	"github.com/jen6/BlockSpam/util"
-	"net"
 	"net/http"
 	"time"
 )
@@ -20,11 +19,7 @@ func GetRedirectLinks(head *link.Link, maxRedirect int) (RedirectResult, error) 
 
 	result := RedirectResult{}
 	for i := head.Depth; i <= maxRedirect; i++ {
-
 		var netTransport = &http.Transport{
-			Dial: (&net.Dialer{
-				Timeout: 5 * time.Second,
-			}).Dial,
 			TLSHandshakeTimeout: 5 * time.Second,
 		}
 
@@ -54,13 +49,17 @@ func GetRedirectLinks(head *link.Link, maxRedirect int) (RedirectResult, error) 
 			return RedirectResult{}, err
 		}
 
-		lastLink = lastLink.Append(resp.Header.Get("Location"))
+		if resp.StatusCode != 200 {
+			lastLink = lastLink.Append(resp.Header.Get("Location"))
+		}
+		result.LastLink = lastLink
 		result.LastResp = resp
 		result.RedirectCnt = i + 1
 
 		if resp.StatusCode == 200 {
 			break
 		}
+
 	}
 	result.LastLink = lastLink
 	return result, nil

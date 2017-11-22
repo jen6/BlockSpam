@@ -15,6 +15,7 @@ const (
 func ParseLinks(trResult spamreq.RedirectResult) ([]*link.Link, error) {
 	body := trResult.LastResp.Body
 	defer body.Close()
+	originDomain, _ := trResult.LastLink.GetDomain()
 
 	parsedBody := html.NewTokenizer(body)
 	links := []string{}
@@ -42,6 +43,9 @@ func ParseLinks(trResult spamreq.RedirectResult) ([]*link.Link, error) {
 			domain, err := lastLink.GetDomain()
 			if err != nil {
 				return []*link.Link{}, err
+			}
+			if domain == "" {
+				domain = originDomain
 			}
 			links[idx] = spamutil.ToAbsoluteLink(linkd, domain)
 		}
