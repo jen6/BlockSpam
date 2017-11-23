@@ -15,6 +15,8 @@ const (
 	link5Domain = "github.com"
 	link6Domain = "jen6.tistory.com"
 	link7Domain = "facebook.com"
+	errorLink   = "aaaa"
+	errorDomain = "aaa"
 )
 
 func TestIsSpam(t *testing.T) {
@@ -29,11 +31,12 @@ func TestIsSpam(t *testing.T) {
 		want    bool
 		wantErr bool
 	}{
-		{"t1", args{link1, []string{link4Domain}, 1}, false, false},
-		{"t2", args{link1, []string{link3Domain}, 2}, true, false},
-		{"t3", args{link2, []string{link1Domain}, 2}, true, false},
-		{"t4", args{link2, []string{link3Domain}, 3}, true, false},
-		{"t5", args{link5, []string{link6Domain}, 3}, true, false},
+		{"t1", args{link1, []string{link4Domain}, 2}, false, false},
+		{"t2", args{link1, []string{link3Domain}, 1}, true, false},
+		{"t3", args{link2, []string{link1Domain}, 1}, true, false},
+		{"t4", args{link2, []string{link3Domain}, 2}, true, false},
+		{"t5", args{link5, []string{link6Domain}, 2}, true, false},
+		{"t6", args{errorLink, []string{errorDomain}, 2}, false, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
