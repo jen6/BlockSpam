@@ -6,14 +6,11 @@ import (
 )
 
 type RequestQueue struct {
-	rwMx  sync.RWMutex
+	mx    sync.Mutex
 	queue []*link.Link
 }
 
-func (rq *RequestQueue) IsEmpty() bool {
-	rq.rwMx.RLock()
-	defer rq.rwMx.RUnlock()
-
+func (rq *RequestQueue) isEmpty() bool {
 	if len(rq.queue) == 0 {
 		return true
 	} else {
@@ -21,12 +18,19 @@ func (rq *RequestQueue) IsEmpty() bool {
 	}
 }
 
+func (rq *RequestQueue) IsEmpty() bool {
+	rq.mx.Lock()
+	result := rq.isEmpty()
+	rq.mx.Unlock()
+	return result
+}
+
 func (rq *RequestQueue) Pop() *link.Link {
+	rq.mx.Lock()
+	defer rq.mx.Unlock()
 	var ret *link.Link
-	if !rq.IsEmpty() {
-		rq.rwMx.Lock()
+	if !rq.isEmpty() {
 		ret, rq.queue = rq.queue[0], rq.queue[1:]
-		rq.rwMx.Unlock()
 	} else {
 		ret = nil
 	}
@@ -34,7 +38,7 @@ func (rq *RequestQueue) Pop() *link.Link {
 }
 
 func (rq *RequestQueue) Push(link *link.Link) {
-	rq.rwMx.Lock()
-	defer rq.rwMx.Unlock()
+	rq.mx.Lock()
+	defer rq.mx.Unlock()
 	rq.queue = append(rq.queue, link)
 }
