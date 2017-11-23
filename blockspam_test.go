@@ -1,5 +1,6 @@
 package blockspam
 
+import "fmt"
 import "testing"
 
 const (
@@ -26,25 +27,21 @@ func TestIsSpam(t *testing.T) {
 		redirectionDepth int
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    bool
-		wantErr bool
+		name string
+		args args
+		want bool
 	}{
-		{"t1", args{link1, []string{link4Domain}, 2}, false, false},
-		{"t2", args{link1, []string{link3Domain}, 1}, true, false},
-		{"t3", args{link2, []string{link1Domain}, 1}, true, false},
-		{"t4", args{link2, []string{link3Domain}, 2}, true, false},
-		{"t5", args{link5, []string{link6Domain}, 2}, true, false},
-		{"t6", args{errorLink, []string{errorDomain}, 2}, false, true},
+		{"t1", args{link1, []string{link4Domain}, 2}, false},
+		{"t2", args{link1, []string{link3Domain}, 1}, true},
+		{"t3", args{link2, []string{link1Domain}, 1}, true},
+		{"t4", args{link2, []string{link3Domain}, 2}, true},
+		{"t5", args{link5, []string{link6Domain}, 2}, true},
+		{"t6", args{errorLink, []string{errorDomain}, 2}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := IsSpam(tt.args.content, tt.args.spamLinkDomains, tt.args.redirectionDepth)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("IsSpam() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			fmt.Println(tt.name)
+			got := IsSpam(tt.args.content, tt.args.spamLinkDomains, tt.args.redirectionDepth)
 			if got != tt.want {
 				t.Errorf("IsSpam() = %v, want %v", got, tt.want)
 			}
