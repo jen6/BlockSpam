@@ -1,9 +1,9 @@
 # BlockSpam
 ## go version
 ```
-# jen6 at localhost in ~/dev/go/src/github.com/jen6/BlockSpam on git:test ✖︎ [11:01:39]
+# jen6 at localhost in ~/dev/go/src/github.com/jen6/BlockSpam on git:oneGo ✖︎ [18:54:26]
 → go version
-go version go1.8.3 linux/amd64
+go version go1.9.2 linux/amd64
 ```
 
 ## install
