@@ -4,6 +4,7 @@ import (
 	"github.com/jen6/BlockSpam/link"
 	"github.com/jen6/BlockSpam/parser"
 	"github.com/jen6/BlockSpam/redirect"
+	"github.com/jen6/BlockSpam/util"
 	"github.com/jen6/rabinkarp"
 )
 
@@ -32,6 +33,7 @@ func IsSpam(content string, spamLinkDomains []string, redirectionDepth int) bool
 }
 
 func fetch(linkIter *link.Link, doneCh chan<- interface{}, redirectionDepth int) {
+	linkMap := spamutil.GetLinkMap()
 	redirectionResult, err := spamreq.GetRedirectLinks(linkIter, redirectionDepth)
 	if err != nil {
 		doneCh <- struct{}{}
@@ -60,7 +62,17 @@ func fetch(linkIter *link.Link, doneCh chan<- interface{}, redirectionDepth int)
 	for i, clink := range childLinks {
 		rch := make(chan interface{})
 		resultChannels[i] = rch
-		go fetch(clink, rch, redirectionDepth)
+
+		duplicateLink, ok := linkMap.Load(clink.FullLink)
+		if ok {
+			*clink = *duplicateLink.(*link.Link)
+			go func() {
+				rch <- struct{}{}
+			}()
+		} else {
+			go fetch(clink, rch, redirectionDepth)
+			linkMap.Store(clink.FullLink, clink)
+		}
 	}
 
 	for _, rch := range resultChannels {
