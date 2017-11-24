@@ -1,6 +1,7 @@
 package blockspam
 
 import (
+	"fmt"
 	"github.com/jen6/BlockSpam/link"
 	"github.com/jen6/BlockSpam/parser"
 	"github.com/jen6/BlockSpam/redirect"
@@ -11,8 +12,8 @@ import (
 
 func IsSpam(content string, spamLinkDomains []string, redirectionDepth int) bool {
 	head := link.NewLinkHead(content)
-	reqQueue := spamreq.RequestQueue{}
-	reqQueue.Push(head)
+	reqQueue := make(chan *link.Link, 5000)
+	reqQueue <- head
 
 	numCpu := runtime.NumCPU()
 	var wg sync.WaitGroup
@@ -24,11 +25,18 @@ func IsSpam(content string, spamLinkDomains []string, redirectionDepth int) bool
 		go func() {
 			defer wg.Done()
 			for {
-				if reqQueue.IsEmpty() {
+				var linkIter *link.Link
+				var ok bool
+				select {
+				case linkIter, ok = <-reqQueue:
+					if !ok {
+						return
+					}
+				default:
+					fmt.Println("novalue")
 					return
 				}
 
-				linkIter := reqQueue.Pop()
 				redirectionResult, err := spamreq.GetRedirectLinks(linkIter, redirectionDepth)
 				if err != nil {
 					workDoneOnce.Do(func() {
@@ -62,7 +70,7 @@ func IsSpam(content string, spamLinkDomains []string, redirectionDepth int) bool
 				}
 
 				for _, clink := range childLinks {
-					reqQueue.Push(clink)
+					reqQueue <- clink
 				}
 
 				workDoneOnce.Do(func() {
@@ -84,6 +92,9 @@ func IsSpam(content string, spamLinkDomains []string, redirectionDepth int) bool
 	}
 	flag := false
 	for _, iterLink := range resultLinks {
+		if iterLink.Depth > redirectionDepth {
+			continue
+		}
 		domain, _ := iterLink.GetDomain()
 		flag = flag || rabinkarp.Search(domain, spamLinkDomains)
 	}
