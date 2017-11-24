@@ -18,7 +18,7 @@ const (
 )
 
 func makeTestLink() *Link {
-	head := &Link{FullLink: aFullLink, Depth: 1}
+	head := NewLinkHead(aFullLink)
 	b := head.Append(bFullLink)
 	_ = b.Append(aaFullLink)
 
@@ -38,8 +38,8 @@ func TestLink_FindDepth(t *testing.T) {
 		args args
 		want []string
 	}{
-		{"find depth2", makeTestLink(), args{depth: 2}, []string{bFullLink, cFullLink}},
-		{"find depth3", makeTestLink(), args{depth: 3}, []string{aaFullLink}},
+		{"find depth1", makeTestLink(), args{depth: 1}, []string{bFullLink, cFullLink}},
+		{"find depth2", makeTestLink(), args{depth: 2}, []string{aaFullLink}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

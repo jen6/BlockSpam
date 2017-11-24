@@ -11,7 +11,7 @@ type Link struct {
 }
 
 func NewLinkHead(url string) *Link {
-	return &Link{FullLink: url, Depth: 1}
+	return &Link{FullLink: url, Depth: 0}
 }
 
 func (l *Link) Append(fullLink string) *Link {
@@ -30,7 +30,7 @@ func (l Link) GetDomain() (string, error) {
 
 //if find Link return pointer of Link else nil
 func (l *Link) FindDepth(depth int) []*Link {
-	if depth == 1 {
+	if depth == 0 {
 		return []*Link{l}
 	}
 

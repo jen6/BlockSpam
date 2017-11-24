@@ -7,12 +7,17 @@ import (
 )
 
 const (
-	testShort   = "https://goo.gl/nVLutc"
-	finalDomain = "tvtv24.com"
+	errorShort   = "aaa"
+	testShort    = "http://bit.ly/2yTkW52"
+	middleDomain = "https://goo.gl/nVLutc"
+	finalDomain  = "http://tvtv24.com/view.php?id=intro&no=58"
 )
 
 func makeTestLink() *link.Link {
-	return &link.Link{FullLink: testShort, Depth: 1}
+	return link.NewLinkHead(testShort)
+}
+func makeTestErrorLink() *link.Link {
+	return link.NewLinkHead(errorShort)
 }
 
 func TestGetRedirectLinks(t *testing.T) {
@@ -26,18 +31,20 @@ func TestGetRedirectLinks(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		{"shortTest", args{makeTestLink(), 3}, finalDomain, false},
+		{"makeError", args{makeTestErrorLink(), 4}, "", true},
+		{"trackMiddleDomain", args{makeTestLink(), 1}, middleDomain, false},
+		{"trackFinalDomain", args{makeTestLink(), 2}, finalDomain, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GetRedirectLinks(tt.args.head, tt.args.maxRedirect)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetRedirectLinks() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got.LastLink == nil {
-				t.Errorf("GetRedirectLinks() error = %v, wantErr %v", err, tt.wantErr)
-				return
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("GetRedirectLinks() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				} else {
+					return
+				}
 			}
 			dom, _ := got.LastLink.GetDomain()
 			if dom == tt.want {
